@@ -51,19 +51,30 @@ from mako.template import Template
 from datetime import datetime
 from dateutil import tz
 import csv
+import os
 
 from_zone = tz.gettz('Zulu')
 to_zone = tz.gettz('America/Chicago')
 
+# Setup where everything is
+# mainDir: Where the module lives
+#   todo: when sysinfor is further along, might make this one of those cool
+#         auto-finding-where-everything-is-dynamically-in-a-pythony-way-things
 mainDir = "/Users/bob/work/sysinfor/modules/avwx"
-wxDir = mainDir + "/data"
-wxFile = wxDir + "/" + "metars.cache.csv"
-saveDir = mainDir + "/html"
-templateFile = "avwx.template"
-htmlTemplate = saveDir + "/" + templateFile
-dSource = "metars"
-rType = "retrieve"
 
+# wxDir: where the wx csv lives
+wxDir = mainDir + "/wx"
+wxFile = wxDir + "/" + "metars.cache.csv"
+
+# htmlDir: Where to save the htmls
+htmlDir = mainDir + "/html"
+templateFile = "avwx.template"
+htmlTemplate = htmlDir + "/" + templateFile
+
+# sysinforSaveDir = where to save the outpus so sysinfor can find it
+sysinforSaveDir = htmlDir + "/sysinfor"
+
+# WRite out what this function does
 def getWxFromFile():
   with open(wxFile, 'rb') as csvFile:
     reader = csv.reader(csvFile)
@@ -105,7 +116,7 @@ def buildHtml(inputData):
   temperature=convertTemp(inputData[5])
   dewpoint=convertTemp(inputData[6])
   altimeter=round(float(inputData[11]), 2)
-  print mytemplate.render(
+  renderedData = mytemplate.render(
     airport=location,
     time=curtime,
     conditions=conditions,
@@ -113,12 +124,26 @@ def buildHtml(inputData):
     temperature=temperature,
     dewpoint=dewpoint,
     altimeter=altimeter)
+  return renderedData
+
+def saveHtml(data, airport):
+  # fileToSave = path of the file to save
+  fileToSave = sysinforSaveDir + "/" + airport + ".html"
+  # Check to see if the save dir exists and create if not
+  if not os.path.exists():
+    os.makedirs(sysinforSaveDir)
+  # Open, trunacate, write, close
+  saveFile = open(fileToSave, "w")
+  saveFile.tunacate()
+  saveFile.write(data)
+  saveFile.close()
 
 airportList = ['KDTO', 'KAFW', 'KSYI']
 wxDataList = getWxFromFile()
 for x in airportList:
   airportWx = getAirportWx(wxDataList, x)
   if airportWx:
-    buildHtml(airportWx)
+    renderedData = buildHtml(airportWx)
+    saveHtml(renderedData, x)
   else:
     print "Error"
