@@ -92,13 +92,17 @@ def convertTemp(temp):
 
 def convertTime(datet):
   # 2017-04-29T15:27:00Z
-  print datet
   utc = datetime.strptime(datet, '%Y-%m-%dT%H:%M:%SZ')
   utc = utc.replace(tzinfo=from_zone)
   central = utc.astimezone(to_zone)
   cTime = central.time()
   cDate = central.date()
-  return str(cTime) + " Central, " + str(cDate)
+  cFull = str(cTime) + " " + str(cDate)
+  uTime = utc.time()
+  uDate = utc.date()
+  uFull = str(uTime) + " " + str(uDate)
+  rdateT = {'local': cFull, 'zulu': uFull}
+  return rdateT
 
 def makeWind(direction, speed, gust):
   if gust is not None:
@@ -107,34 +111,53 @@ def makeWind(direction, speed, gust):
       theWind = direction + " @ " + speed
   return theWind
 
+def buildClouds(rawClouds):
+  prettyClouds = {}
+  layerList = ['layer1','layer2','layer3','layer4']
+  for entry in layerList:
+    if rawClouds[entry][0] != "":
+      prettyClouds[entry] = rawClouds[entry][0] + " " + rawClouds[entry][1]
+  return prettyClouds
+
 def buildHtml(inputData):
   mytemplate = Template(filename=htmlTemplate)
   location=inputData[1]
-  curtime=convertTime(inputData[2])
+  localcurtime=convertTime(inputData[2])['local']
+  zulucurtime = convertTime(inputData[2])['zulu']
   conditions=inputData[30]
   wind=makeWind(inputData[7],inputData[8],inputData[9])
   temperature=convertTemp(inputData[5])
   dewpoint=convertTemp(inputData[6])
   altimeter=round(float(inputData[11]), 2)
+  vis = inputData[10]
+  rawClouds = {'layer1': [inputData[22],inputData[23]],
+            'layer2': [inputData[24],inputData[25]],
+            'layer3': [inputData[26],inputData[27]],
+            'layer4': [inputData[28],inputData[29]]
+           }
+  myClouds = buildClouds(rawClouds)
   renderedData = mytemplate.render(
     airport=location,
-    time=curtime,
+    tztime=localcurtime,
+    ztime=zulucurtime,
     conditions=conditions,
     wind=wind,
     temperature=temperature,
     dewpoint=dewpoint,
-    altimeter=altimeter)
+    altimeter=altimeter,
+    visibility = vis,
+    clouds = myClouds)
   return renderedData
 
 def saveHtml(data, airport):
   # fileToSave = path of the file to save
   fileToSave = sysinforSaveDir + "/" + airport + ".html"
   # Check to see if the save dir exists and create if not
-  if not os.path.exists():
+  if not os.path.exists(sysinforSaveDir):
     os.makedirs(sysinforSaveDir)
   # Open, trunacate, write, close
   saveFile = open(fileToSave, "w")
-  saveFile.tunacate()
+  saveFile.truncate()
   saveFile.write(data)
   saveFile.close()
 
