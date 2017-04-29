@@ -1,0 +1,19 @@
+<html>
+  <body>
+  Airport: ${airport}
+  <table>
+    <tr>
+      <th>Time: ${time}</th>
+      <th>Conditions: ${conditions}</th>
+    </tr>
+    <tr>
+      <th>Wind: ${wind}</th>
+      <th>Temperature: ${temperature}</th>
+    </tr>
+    <tr>
+      <th>Altimeter: ${altimeter}</th>
+      <th>Dew Point: ${dewpoint}</th>
+    </tr>
+  </table>      
+  </body>
+</html>
