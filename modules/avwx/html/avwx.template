@@ -1,18 +1,51 @@
 <html>
+  <head>
+    <style>
+      th {
+           text-align: left;
+         }
+      ul {
+           list-style-type: none;
+         }
+    </style>
+  </head>
   <body>
   Airport: ${airport}
   <table>
     <tr>
-      <th>Time: ${time}</th>
-      <th>Conditions: ${conditions}</th>
+      <th>Local Time: </th>
+      <th>${tztime}</th>
+      <th>Conditions: </th>
+      <th>${conditions}</th>
     </tr>
     <tr>
-      <th>Wind: ${wind}</th>
-      <th>Temperature: ${temperature}</th>
+      <th>Zulu Time: </th>
+      <th>${ztime}</th>
+      <th>Wind: </th>
+      <th>${wind}</th>
     </tr>
     <tr>
-      <th>Altimeter: ${altimeter}</th>
-      <th>Dew Point: ${dewpoint}</th>
+      <th>Temperature: </th>
+      <th>${temperature}</th>
+      <th>Altimeter: </th>
+      <th>${altimeter}</th>
+    </tr>
+    <tr>
+      <th>Dew Point: </th>
+      <th>${dewpoint}</th>
+      <th>Visibility: </th>
+      <th>${visibility}</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>Clouds</th>
+      <th>
+        <ul>
+          % for item in clouds.values() :
+            <li>${item}</li>
+          % endfor
+        </ul>
+      </th>
     </tr>
   </table>      
   </body>
