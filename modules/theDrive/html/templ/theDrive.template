@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <style>
+      th {
+           text-align: left;
+         }
+      ul {
+           list-style-type: none;
+         }
+    </style>
+  </head>
+  <body>
+    From: ${froma}</br>
+    To: ${to}</br>
+    Route: ${route}</br>
+    Distance: ${distance}</br>
+    Time: ${time}</br>
+  </body>
+</html>
