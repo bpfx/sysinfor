@@ -52,6 +52,7 @@ from datetime import datetime
 from dateutil import tz
 import csv
 import os
+import gzip
 
 from_zone = tz.gettz('Zulu')
 to_zone = tz.gettz('America/Chicago')
@@ -67,6 +68,8 @@ mainDir = "/Users/bob/work/sysinfor/modules/avwx"
 # /Users/bob/work/sysinfor/modules/avwx/wx/metars.cache.csv
 wxDir = mainDir + "/wx"
 wxFile = wxDir + "/" + "metars.cache.csv"
+wxFileGz = wxFile + ".gz"
+wxRemoteFile = "https://aviationweather.gov/adds/dataserver_current/current/metars.cache.csv.gz"
 
 # htmlDir: Where to save the htmls
 htmlDir = mainDir + "/html"
@@ -85,9 +88,10 @@ def getWxFromFile():
 
 def getAirportWx(theList,airport):
   for line in theList:
-    if line[1] == airport:
-      return line
-  return Null
+    if len(line) > 1:
+      if line[1] == airport:
+        return line
+  return None
 
 def convertTemp(temp):
   return (float(temp)*1.8)+32
@@ -107,10 +111,10 @@ def convertTime(datet):
   return rdateT
 
 def makeWind(direction, speed, gust):
-  if gust is not None:
-    theWind = direction + " @ " + speed + "G" + gust
+  if gust != "":
+    theWind = direction + "&#176" + " @ " + speed + "kts" + "G" + gust + "kts"
   else:
-      theWind = direction + " @ " + speed
+      theWind = direction + "&#176" + " @ " + speed + "kts"
   return theWind
 
 def buildClouds(rawClouds):
@@ -163,12 +167,28 @@ def saveHtml(data, airport):
   saveFile.write(data)
   saveFile.close()
 
-airportList = ['KDTO', 'KAFW', 'KSYI']
-wxDataList = getWxFromFile()
-for x in airportList:
-  airportWx = getAirportWx(wxDataList, x)
-  if airportWx:
-    renderedData = buildHtml(airportWx)
-    saveHtml(renderedData, x)
-  else:
-    print "Error"
+def setupStuff():
+  r = requests.get(wxRemoteFile,stream=True)
+  with open(wxFileGz,"wb") as f:
+    for chunk in r.iter_content(chunk_size=1024):
+      if chunk:
+          f.write(chunk)
+  f.close()
+  with gzip.open(wxFileGz,"rb") as f:
+      file_content = f.read()
+  f.close()
+  with open(wxFile,"wb") as f:
+    f.write(file_content)
+  f.close()
+
+if __name__ == "__main__":
+  #setupStuff()
+  airportList = ['KDTO', 'KAFW', 'KSYI']
+  wxDataList = getWxFromFile()
+  for x in airportList:
+    airportWx = getAirportWx(wxDataList, x)
+    if airportWx:
+      renderedData = buildHtml(airportWx)
+      saveHtml(renderedData, x)
+    else:
+      print "Error"
