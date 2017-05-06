@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 # 0 raw_text,
 # 1 station_id,
@@ -63,6 +63,8 @@ to_zone = tz.gettz('America/Chicago')
 mainDir = "/Users/bob/work/sysinfor/modules/avwx"
 
 # wxDir: where the wx csv lives
+# Currently:
+# /Users/bob/work/sysinfor/modules/avwx/wx/metars.cache.csv
 wxDir = mainDir + "/wx"
 wxFile = wxDir + "/" + "metars.cache.csv"
 

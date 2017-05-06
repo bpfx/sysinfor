@@ -27,6 +27,7 @@ htmlTemplate = templateDir + "/" + "theDrive.template"
 import requests
 from mako.template import Template
 import os
+import datetime
 
 def buildPayload(destin):
     payload = {'origin' : homeAddy[1],
@@ -48,18 +49,24 @@ def processData(information):
     distTime = {'dist': distance,'time': time,'route': route}
     return distTime
 
+def getTime():
+    daTime = datetime.datetime.now()
+    timeNow = daTime.strftime('%Y/%m/%d %H:%M:%S')
+    return timeNow
+
 def buildHtmlData(infoStruct,destination):
     mytemplate = Template(filename=htmlTemplate)
     time = infoStruct['time']
     distance = infoStruct['dist']
     route = infoStruct['route']
+    timeNow = getTime()
     renderedData = mytemplate.render(
+        curtime = timeNow,
         to=destination[0],
         route=route,
         froma=homeAddy[0],
         distance=distance,
         time=time)
-    print renderedData
     return renderedData
 
 def saveHtml(html,dest):

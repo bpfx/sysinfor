@@ -10,6 +10,7 @@
     </style>
   </head>
   <body>
+    At Time: ${curtime}</br>
     From: ${froma}</br>
     To: ${to}</br>
     Route: ${route}</br>
